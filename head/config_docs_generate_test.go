@@ -14,6 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build reference
+// +build reference
+
 package config
 
 import (
@@ -24,20 +27,39 @@ import (
 
 	"github.com/hyperledger/firefly-common/pkg/config"
 	"github.com/hyperledger/firefly/internal/apiserver"
-	"github.com/hyperledger/firefly/internal/orchestrator"
+	"github.com/hyperledger/firefly/internal/namespace"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateConfigDocs(t *testing.T) {
 	// Initialize config of all plugins
-	orchestrator.NewOrchestrator(false)
+	namespace.InitConfig()
 	apiserver.InitConfig()
 	f, err := os.Create(filepath.Join("reference", "config.md"))
 	assert.NoError(t, err)
-	generatedConfig, err := config.GenerateConfigMarkdown(context.Background(), config.GetKnownKeys())
+	generatedConfig, err := config.GenerateConfigMarkdown(context.Background(), configDocHeader, config.GetKnownKeys())
 	assert.NoError(t, err)
 	_, err = f.Write(generatedConfig)
 	assert.NoError(t, err)
 	err = f.Close()
 	assert.NoError(t, err)
 }
+
+const configDocHeader = `---
+layout: default
+title: Configuration Reference
+parent: pages.reference
+nav_order: 2
+---
+
+# Configuration Reference
+{: .no_toc }
+
+<!-- ## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc} -->
+
+---
+`
